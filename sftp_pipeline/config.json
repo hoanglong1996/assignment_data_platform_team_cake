@@ -1,0 +1,14 @@
+{
+    "source_sftp": {
+        "host": "host.docker.internal",
+        "port": 22,
+        "username": "demo",
+        "password": "demo"
+    },
+    "target_sftp": {
+        "host": "host.docker.internal",
+        "port": 23,
+        "username": "demo",
+        "password": "demo"
+    }
+}
