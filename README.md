@@ -20,8 +20,9 @@ docker build -t sftp_pipeline .
 cd ..
 
 cd airflow
- 
+
 docker-compose up airflow-init
+
 docker-compose up -d
 
 ### login airflow with this username/password
