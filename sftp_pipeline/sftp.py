@@ -2,6 +2,7 @@ import paramiko
 import os
 import json
 import glob
+from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 ROOT_DIR = os.path.abspath(os.curdir)
 
@@ -15,6 +16,7 @@ class SFTP_data_pipeline(object):
         config = json.loads(config)
         self.config = config
 
+    @retry(wait=wait_random_exponential(multiplier=3, max=60), stop=stop_after_attempt(5))
     def read_file_from_source_sftp(self):
         try:
             source_sftp = self.config['source_sftp']
@@ -25,12 +27,14 @@ class SFTP_data_pipeline(object):
             files = sftp.listdir('/sftp')
             for i, file in enumerate(files):
                 sftp.get(f'/sftp/{file}', f'./temporary/{file}')
-                print(f'Moved {file}')
+                print(f'Downloaded {file}')
             sftp.close()
             ssh.close()
         except Exception as e:
             print(e)
+            raise RuntimeError(e)
 
+    @retry(wait=wait_random_exponential(multiplier=3, max=60), stop=stop_after_attempt(5))
     def push_files_to_target_sftp(self, files):
         try:
             target_sftp = self.config['target_sftp']
@@ -45,6 +49,7 @@ class SFTP_data_pipeline(object):
             ssh.close()
         except Exception as e:
             print(e)
+            raise RuntimeError(e)
 
     def read_files_in_temporary_folder(self):
         files = glob.glob('temporary/*')
